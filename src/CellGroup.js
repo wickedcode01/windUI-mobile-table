@@ -1,14 +1,27 @@
+// @flow
+
 import * as React from 'react';
 import classNames from 'classnames';
 import { defaultClassPrefix, getUnhandledProps, prefix, translateDOMPositionXY } from './utils';
 
-class CellGroup extends React.PureComponent {
+type Props = {
+  fixed?: 'left' | 'right',
+  width?: number,
+  height?: number,
+  left?: number,
+  style?: Object,
+  className?: string,
+  classPrefix?: string,
+  updatePosition: (style: Object, x: number, y: number) => void
+};
+
+class CellGroup extends React.PureComponent<Props> {
   static defaultProps = {
     classPrefix: defaultClassPrefix('table-cell-group'),
     updatePosition: translateDOMPositionXY
   };
 
-  addPrefix = (name) => prefix(this.props.classPrefix)(name);
+  addPrefix = (name: string) => prefix(this.props.classPrefix)(name);
 
   render() {
     const {

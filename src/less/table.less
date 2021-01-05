@@ -1,10 +1,10 @@
 &-table {
-  // border: 1px solid @border-color;
+  border: 1px solid @border-color;
   position: relative;
   overflow: hidden;
+  -webkit-overflow-scrolling: touch;
   touch-action:pan-y;
   font-size: 14px;
-  line-height: 1;
   &-column-resizing {
     cursor: ew-resize;
     .user-select();
@@ -33,7 +33,6 @@
 
   &-row-header {
     background: @head-background;
-    font-size: 14px;
   }
   &-row-header &-cell {
     background: @head-background;
@@ -129,22 +128,28 @@
         vertical-align: middle;
       }
       &-icon-sort::after {
-        content: url('../dist/sort.svg');
+        content: url('./sort.svg');
       }
       &-icon-sort-asc::after {
-        content: url('../dist/sort1.svg');
+        content: url('./sort1.svg');
       }
       &-icon-sort-desc::after {
-        content: url('../dist/sort2.svg');
+        content: url('./sort2.svg');
       }
-    }
-    
-    &-bordered{
-      
     }
 
   }
-
+  &-column-resize-spanner {
+    height: 36px;
+    width: 6px;
+    z-index: 3;
+    position: absolute;
+    cursor: ew-resize !important;
+    outline: none;
+    &:hover {
+      background: @resize-mouse-color;
+    }
+  }
   &-cell-group {
     &-fixed-left {
       position: absolute;
@@ -158,12 +163,12 @@
       margin-left: 10px;
     }
     &-left-shadow {
-      .box-shadow(3px, 0px, 5px, rgba(9, 9, 9, 0.027));
+      .box-shadow(3px, 0px, 5px, rgba(9, 9, 9, 0.08));
     }
 
     &-shadow,
     &-right-shadow {
-      .box-shadow(-3px, 0px, 5px, rgba(9, 9, 9, 0.027));
+      .box-shadow(-3px, 0px, 5px, rgba(9, 9, 9, 0.08));
     }
   }
   
@@ -182,15 +187,22 @@
     border-width: 0 0 1px 0;
   }
 
-  &-cell-bordered &-cell{
-    border-width:0 0 0 1px;
-  }
   &-word-wrap &-cell-content {
     white-space: unset;
     word-break: break-all;
     word-wrap: break-word;
   }
 
+  &-row-expanded {
+    position: absolute;
+    height: 46px;
+    bottom: 0;
+    width: 100%;
+    z-index: 4;
+    border-top: 1px solid #eee;
+    padding: 10px;
+    background: #f5f5f5;
+  }
 
   &-loader-wrapper {
     visibility: hidden;
@@ -212,6 +224,7 @@
     &-icon {
       .set-side-length(18px);
       .loader-spin;
+
       display: inline-block;
       position: relative;
       margin-right: 12px;
@@ -219,10 +232,7 @@
       padding-top: 3px;
     }
   }
-
   &-loading &-loader-wrapper {
     visibility: visible;
   }
-
-  
 }
