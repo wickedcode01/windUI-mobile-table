@@ -18,13 +18,7 @@ let data = [{
         name: 'test',
         value: '1000'
     }] <
-    Table columns = {
-        col
-    }
-data = {
-    data
-}
-/> 
+    <Table columns = {col} data = {data} /> 
 ```
 
 ## api
