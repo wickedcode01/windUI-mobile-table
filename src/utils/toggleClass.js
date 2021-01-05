@@ -1,13 +1,13 @@
 import { addClass, removeClass } from 'dom-lib';
 
-const toggleClass1 = (node: HTMLElement, className: string, condition: boolean) => {
+const toggleClass1 = (node, className, condition) => {
   if (condition) {
     addClass(node, className);
   } else {
     removeClass(node, className);
   }
 };
-const toggleClass=(node: HTMLElement | Array<HTMLElement>, className: string, condition: boolean) => {
+const toggleClass=(node, className, condition) => {
   if (!node) {
     return;
   }

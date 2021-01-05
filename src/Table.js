@@ -84,7 +84,7 @@ class Table extends React.Component {
     return null;
   }
 
-  constructor(props: Props) {
+  constructor(props) {
     super(props);
     //props
     const {
@@ -102,7 +102,7 @@ class Table extends React.Component {
       ? findRowKeys(data, rowKey, _.isFunction(renderRowExpanded))
       : defaultExpandedRowKeys || [];
     const shouldFixedColumn = Array.from(children).some(
-      (child: any) => child && child.props && child.props.fixed
+      (child) => child && child.props && child.props.fixed
     );
     if (isTree && !rowKey) {
       throw new Error('The `rowKey` is required when set isTree');
@@ -140,12 +140,11 @@ class Table extends React.Component {
     });
   }
 
-  _listenWheel = (deltaX: number, deltaY: number) => {
+  _listenWheel = (deltaX, deltaY) => {
     this.handleWheel(deltaX, deltaY);
     if (this.scrollbarX) {
       this.scrollbarX.onWheelScroll(deltaX);
     }
-
     if (this.scrollbarY) {
       this.scrollbarY.onWheelScroll(deltaY);
     }
@@ -156,8 +155,8 @@ class Table extends React.Component {
     this.calculateTableContextHeight();
     this.calculateRowMaxHeight();
     this.setAffixHeaderOffset();
+    //延时400ms防抖
     bindElementResize(this.table, _.debounce(this.calculateTableWidth, 400));
-
     const options = { passive: false };
     this.wheelListener = on(this.tableBody, 'wheel', this.wheelHandler.onWheel, options);
     this.touchStartListener = on(this.tableBody, 'touchstart', this.handleTouchStart, options);
@@ -169,13 +168,12 @@ class Table extends React.Component {
     }
   }
 
-  shouldComponentUpdate(nextProps: Props, nextState: State) {
+  shouldComponentUpdate(nextProps, nextState) {
     const _cacheChildrenSize = _.flatten(nextProps.children || []).length;
     if (_cacheChildrenSize !== this._cacheChildrenSize) {
       this._cacheChildrenSize = _cacheChildrenSize;
       this._cacheCells = null;
     }
-
     if (
       this.props.children !== nextProps.children ||
       this.props.sortColumn !== nextProps.sortColumn ||
@@ -183,17 +181,17 @@ class Table extends React.Component {
     ) {
       this._cacheCells = null;
     }
-
     return !_.eq(this.props, nextProps) || !_.isEqual(this.state, nextState);
   }
 
-  componentDidUpdate(prevProps: Props) {
+  componentDidUpdate(prevProps) {
     this.calculateTableContextHeight(prevProps);
     this.calculateTableContentWidth(prevProps);
     this.calculateRowMaxHeight();
     this.updatePosition();
   }
 
+  //卸载监听事件
   componentWillUnmount() {
     this.wheelHandler = null;
     if (this.table) {
@@ -216,8 +214,8 @@ class Table extends React.Component {
     if (this.scrollListener) {
       this.scrollListener.off();
     }
-
   }
+
   getExpandedRowKeys() {
     const { expandedRowKeys } = this.props;
     return _.isUndefined(expandedRowKeys) ? this.state.expandedRowKeys : expandedRowKeys;
@@ -241,17 +239,14 @@ class Table extends React.Component {
     return this.table.querySelectorAll(`.${this.addPrefix('cell-group-fixed-right')}`);
   }
 
-  /**
-   * 获取表头高度
-   */
+  //  获取表头高度
   getTableHeaderHeight() {
     const { headerHeight, showHeader } = this.props;
     return showHeader ? headerHeight : 0;
   }
 
-  /**
-   * 获取 Table 需要渲染的高度
-   */
+ 
+   // 获取 Table 需要渲染的高度
   getTableHeight() {
     const { contentHeight } = this.state;
     const { minHeight, height, autoHeight, data } = this.props;
@@ -264,6 +259,7 @@ class Table extends React.Component {
     return autoHeight ? Math.max(headerHeight + contentHeight + 2, minHeight) : height;
   }
 
+  
   setAffixHeaderOffset = () => {
     const { affixHeader } = this.props;
     if (affixHeader === 0 || affixHeader) {
@@ -299,14 +295,15 @@ class Table extends React.Component {
 
   //获取单元格
   getCells() {
+
     if (this._cacheCells) {
       return this._cacheCells;
     }
+
     let left = 0; // Cell left margin
     const headerCells = []; // Table header cell
     const bodyCells = []; // Table body cell
     const children = this.props.children;
-
     if (!children) {
       this._cacheCells = {
         headerCells,
@@ -322,23 +319,72 @@ class Table extends React.Component {
     const headerHeight = this.getTableHeaderHeight();
     const { totalFlexGrow, totalWidth } = getTotalByColumns(columns);
 
+    // col.forEach((column,index)=>{
+    //   const {width, resizable, flexGrow, minWidth, onResize}=column;
+    //   if (resizable && flexGrow) {
+    //     console.warn( `Cannot set 'resizable' and 'flexGrow' together in <Column>, column index: ${index}`);
+    //   }
+    //   let nextWidth =this.state[`${column.dataKey}_${index}_width`] || width || 0;
+    //   if (tableWidth && flexGrow && totalFlexGrow) {
+    //     nextWidth = Math.max(
+    //       ((tableWidth - totalWidth) / totalFlexGrow) * flexGrow,
+    //       minWidth || 80
+    //     );
+    //   }
+
+    //   const cellProps = {
+    //     ..._.pick(column, columnHandledProps),
+    //     left,
+    //     index,
+    //     headerHeight,
+    //     key: index,
+    //     width: nextWidth,
+    //     height: rowHeight,
+    //     firstColumn: index === 0,
+    //     lastColumn: index === columns.length - 1
+    //   };
+
+    //     //渲染表头
+    //     if (showHeader && headerHeight) {
+    //       const headerCellProps = {
+    //         dataKey: column.dataKey,
+    //         isHeaderCell: true,
+    //         sortable: column.sortable,
+    //         onSortColumn: this.handleSortColumn,
+    //         sortType: this.getSortType(),
+    //         sortColumn,
+    //         flexGrow
+    //       };
+
+    //       if (resizable) {
+    //         _.merge(headerCellProps, {
+    //           onResize,
+    //           onColumnResizeEnd: this.handleColumnResizeEnd,
+    //           onColumnResizeStart: this.handleColumnResizeStart,
+    //           onColumnResizeMove: this.handleColumnResizeMove
+    //         });
+    //       }
+
+    //       headerCells.push(
+    //         React.cloneElement(columnChildren[0], {
+    //           ...cellProps,
+    //           ...headerCellProps
+    //         })
+    //       );
+    //     }
+
+    // })
+
     React.Children.forEach(columns, (column, index) => {
       if (React.isValidElement(column)) {
         const columnChildren = column.props.children;
+        //Column props
         const { width, resizable, flexGrow, minWidth, onResize } = column.props;
-
         if (resizable && flexGrow) {
-          console.warn(
-            `Cannot set 'resizable' and 'flexGrow' together in <Column>, column index: ${index}`
-          );
+          console.warn( `Cannot set 'resizable' and 'flexGrow' together in <Column>, column index: ${index}`);
         }
 
-        if (columnChildren.length !== 2) {
-          throw new Error(`Component <HeaderCell> and <Cell> is required, column index: ${index} `);
-        }
-
-        let nextWidth =
-          this.state[`${columnChildren[1].props.dataKey}_${index}_width`] || width || 0;
+        let nextWidth =this.state[`${columnChildren[1].props.dataKey}_${index}_width`] || width || 0;
 
         if (tableWidth && flexGrow && totalFlexGrow) {
           nextWidth = Math.max(
@@ -401,10 +447,10 @@ class Table extends React.Component {
   }
 
   handleColumnResizeEnd = (
-    columnWidth: number,
-    cursorDelta: number,
-    dataKey: any,
-    index: number
+    columnWidth,
+    cursorDelta,
+    dataKey,
+    index
   ) => {
     this._cacheCells = null;
     this.setState({
@@ -417,7 +463,7 @@ class Table extends React.Component {
     });
   };
 
-  handleColumnResizeStart = (width: number, left: number, fixed: boolean) => {
+  handleColumnResizeStart = (width, left, fixed) => {
     this.setState({
       isColumnResizing: true
     });
@@ -428,7 +474,7 @@ class Table extends React.Component {
     addStyle(this.mouseArea, styles);
   };
 
-  handleColumnResizeMove = (width: number, left: number, fixed: boolean) => {
+  handleColumnResizeMove = (width, left, fixed) => {
     const mouseAreaLeft = width + left;
     const x = fixed ? mouseAreaLeft : mouseAreaLeft + (this.scrollX || 0);
     const styles = {};
@@ -436,7 +482,7 @@ class Table extends React.Component {
     addStyle(this.mouseArea, styles);
   };
 
-  handleTreeToggle = (rowKey: any, rowIndex: number, rowData: any) => {
+  handleTreeToggle = (rowKey, rowIndex, rowData) => {
     const { onExpandChange } = this.props;
     const expandedRowKeys = this.getExpandedRowKeys();
 
@@ -461,10 +507,10 @@ class Table extends React.Component {
     onExpandChange && onExpandChange(!open, rowData);
   };
 
-  handleScrollX = (delta: number) => {
+  handleScrollX = (delta) => {
     this.handleWheel(delta, 0);
   };
-  handleScrollY = (delta: number) => {
+  handleScrollY = (delta) => {
     this.handleWheel(0, delta);
   };
 
@@ -477,8 +523,8 @@ class Table extends React.Component {
   };
 
   //更新x y坐标
-  handleWheel = (deltaX: number, deltaY: number) => {
-    const { onScroll, virtualized } = this.props;
+  handleWheel = (deltaX, deltaY) => {
+    const { onScroll, virtualized ,height} = this.props;
     if (!this.table) {
       return;
     }
@@ -486,12 +532,19 @@ class Table extends React.Component {
     const nextScrollY = this.scrollY - deltaY;
     this.scrollY = Math.min(0, nextScrollY < this.minScrollY ? this.minScrollY : nextScrollY);
     this.scrollX = Math.min(0, nextScrollX < this.minScrollX ? this.minScrollX : nextScrollX);
-    this.updatePosition();
+    if(-this.scrollY<(this.state.contentHeight-height)){
+      this.updatePosition();
+    }
+    
     const { allColumnsWidth } = this.getCells();
     const rowWidth = allColumnsWidth > this.state.width ? allColumnsWidth : this.state.width;
     if (-this.scrollX === rowWidth - this.state.width) this.setState({ MoreX: false })
     else this.setState({ MoreX: true })
+
+    //回调函数
     onScroll && onScroll(this.scrollX, this.scrollY);
+    console.log(this.scrollY)
+    
     if (virtualized) {
       this.setState({
         isScrolling: true,
@@ -505,7 +558,8 @@ class Table extends React.Component {
   };
 
   // 处理移动端 Touch 事件,  Start 的时候初始化 x,y
-  handleTouchStart = (event: SyntheticTouchEvent<*>) => {
+  handleTouchStart = (event) => {
+    
     clearInterval(this.timer)
     const { onTouchStart } = this.props;
     const { pageX, pageY } = event.touches ? event.touches[0] : {};
@@ -518,8 +572,9 @@ class Table extends React.Component {
   };
 
   // 处理移动端 Touch 事件, Move 的时候初始化，更新 scroll
-  handleTouchMove = (event: SyntheticTouchEvent<*>) => {
+  handleTouchMove = (event) => {
     event.stopPropagation();
+    event.preventDefault();
     const { onTouchMove, autoHeight, disabledScroll } = this.props;
     const { pageX: nextPageX, pageY: nextPageY } = event.touches ? event.touches[0] : {};
     let detx = this.touchX - nextPageX;
@@ -545,7 +600,7 @@ class Table extends React.Component {
   };
 
   //处理touch 结束 惯性滑动
-  handleTouchEnd = (event: SyntheticTouchEvent<*>) => {
+  handleTouchEnd = (event) => {
     const { pageX, pageY } = event.changedTouches[0];
     let deltaX = (this.startX - pageX);
     let deltaY = (this.startY - pageY);
@@ -568,7 +623,7 @@ class Table extends React.Component {
   /*
    * 当用户在 Table 内使用 tab 键，触发了 onScroll 事件，这个时候应该更新滚动条位置
    */
-  handleBodyScroll = (event: SyntheticTouchEvent<*>) => {
+  handleBodyScroll = (event) => {
     if (event.target !== this.tableBody) {
       return;
     }
@@ -634,6 +689,7 @@ class Table extends React.Component {
     toggleClass(fixedLeftGroups, leftShadowClassName, showLeftShadow);
     toggleClass(fixedRightGroups, rightShadowClassName, showRightShadow);
   }
+
   shouldHandleWheelX = (delta) => {
     const { disabledScroll, loading } = this.props;
     const { contentWidth, width } = this.state;
@@ -646,6 +702,7 @@ class Table extends React.Component {
     }
     return (delta >= 0 && this.scrollX > this.minScrollX) || (delta < 0 && this.scrollX < 0);
   };
+
   shouldHandleWheelY = (delta) => {
     const { disabledScroll, loading } = this.props;
     if (delta === 0 || disabledScroll || loading) {
@@ -670,9 +727,7 @@ class Table extends React.Component {
   scrollY = 0;
   scrollX = 0;
 
-
   addPrefix = (name) => prefix(this.props.classPrefix)(name);
-
   //计算行高
   calculateRowMaxHeight() {
     const { wordWrap } = this.props;
@@ -714,7 +769,7 @@ class Table extends React.Component {
     this.setAffixHeaderOffset();
   };
   //计算表格内容宽度
-  calculateTableContentWidth(prevProps: Props) {
+  calculateTableContentWidth(prevProps) {
     const table = this.table;
     const row = table.querySelector(`.${this.addPrefix('row')}:not(.virtualized)`);
     const contentWidth = row ? getWidth(row) : 0;
@@ -734,7 +789,7 @@ class Table extends React.Component {
     }
   }
   //计算表格内容高度
-  calculateTableContextHeight(prevProps: Props) {
+  calculateTableContextHeight(prevProps) {
     const table = this.table;
     const rows = table.querySelectorAll(`.${this.addPrefix('row')}`) || [];
     const { height, autoHeight, rowHeight } = this.props;
@@ -745,11 +800,8 @@ class Table extends React.Component {
         .map(row => getHeight(row) || rowHeight)
         .reduce((x, y) => x + y)
       : 0;
-    // console.log(contentHeight);
     const nextContentHeight = contentHeight - headerHeight;
-    this.setState({
-      contentHeight: nextContentHeight
-    });
+    this.setState({contentHeight: nextContentHeight});
 
     if (
       prevProps &&
@@ -782,7 +834,7 @@ class Table extends React.Component {
    * public method
    * top 值是表格理论滚动位置的一个值，通过 top 计算出 scrollY 坐标值与滚动条位置的值
    */
-  scrollTop = (top: number = 0) => {
+  scrollTop = (top = 0) => {
     const { height, headerHeight } = this.props;
     const { contentHeight } = this.state;
     const scrollY = Math.max(0, top - (height - headerHeight));
@@ -810,68 +862,68 @@ class Table extends React.Component {
   };
 
   // public method
-  scrollLeft = (left: number = 0) => {
+  scrollLeft = (left= 0) => {
     this.scrollX = -left;
     this.scrollbarX && this.scrollbarX.resetScrollBarPosition(left);
     this.updatePosition();
   };
 
-  bindTableRowsRef = (index: number) => (ref: React.ElementRef<*>) => {
+  bindTableRowsRef = (index) => (ref) => {
     if (ref) {
       this.tableRows[index] = ref;
     }
   };
 
-  bindMouseAreaRef = (ref: React.ElementRef<*>) => {
+  bindMouseAreaRef = (ref) => {
     this.mouseArea = ref;
   };
 
-  bindTableHeaderRef = (ref: React.ElementRef<*>) => {
+  bindTableHeaderRef = (ref) => {
     this.tableHeader = ref;
   };
 
-  bindHeaderWrapperRef = (ref: React.ElementRef<*>) => {
+  bindHeaderWrapperRef = (ref) => {
     this.headerWrapper = ref;
   };
 
-  bindAffixHeaderRef = (ref: React.ElementRef<*>) => {
+  bindAffixHeaderRef = (ref) => {
     this.affixHeaderWrapper = ref;
   };
 
-  bindTableRef = (ref: React.ElementRef<*>) => {
+  bindTableRef = (ref) => {
     this.table = ref;
   };
 
-  bindWheelWrapperRef = (ref: React.ElementRef<*>) => {
+  bindWheelWrapperRef = (ref) => {
     const { bodyRef } = this.props;
     this.wheelWrapper = ref;
     bodyRef && bodyRef(ref);
   };
 
-  bindBodyRef = (ref: React.ElementRef<*>) => {
+  bindBodyRef = (ref) => {
     this.tableBody = ref;
   };
 
-  bindScrollbarXRef = (ref: React.ElementRef<*>) => {
+  bindScrollbarXRef = (ref) => {
     this.scrollbarX = ref;
   };
 
-  bindScrollbarYRef = (ref: React.ElementRef<*>) => {
+  bindScrollbarYRef = (ref) => {
     this.scrollbarY = ref;
   };
 
-  bindRowClick = (rowData: Object) => {
+  bindRowClick = (rowData) => {
     const { onRowClick } = this.props;
-    return (event: SyntheticEvent<*>) => {
+    return (event) => {
       onRowClick && onRowClick(rowData, event);
     };
   };
 
   renderRowData(
-    bodyCells: Array<any>,
-    rowData: Object,
-    props: Object,
-    shouldRenderExpandedRow?: boolean
+    bodyCells,
+    rowData,
+    props,
+    shouldRenderExpandedRow
   ) {
     const { renderTreeToggle, rowKey, wordWrap, isTree } = this.props;
     const hasChildren = isTree && rowData.children && Array.isArray(rowData.children);
@@ -912,7 +964,7 @@ class Table extends React.Component {
   }
 
   //渲染表格行
-  renderRow(props: Object, cells: Array<any>, shouldRenderExpandedRow?: boolean, rowData?: Object) {
+  renderRow(props, cells, shouldRenderExpandedRow, rowData) {
     const { rowClassName } = this.props;
     const { shouldFixedColumn, width, contentWidth } = this.state;
     props.updatePosition = this.translateDOMPositionXY;
@@ -988,7 +1040,7 @@ class Table extends React.Component {
   }
 
   //渲染可展开行
-  renderRowExpanded(rowData?: Object) {
+  renderRowExpanded(rowData) {
     const { renderRowExpanded, rowExpandedHeight } = this.props;
     const styles = {
       height: rowExpandedHeight
@@ -1018,7 +1070,7 @@ class Table extends React.Component {
   }
 
   //渲染表头
-  renderTableHeader(headerCells: Array<any>, rowWidth: number) {
+  renderTableHeader(headerCells, rowWidth) {
     const { rowHeight, affixHeader } = this.props;
     const { width: tableWidth } = this.state;
     const top = typeof affixHeader === 'number' ? affixHeader : 0;
@@ -1076,7 +1128,7 @@ class Table extends React.Component {
   _rows = [];
 
   //渲染表体
-  renderTableBody(bodyCells: Array<any>, rowWidth: number) {
+  renderTableBody(bodyCells, rowWidth) {
     const {
       rowHeight,
       rowExpandedHeight,

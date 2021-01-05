@@ -4,45 +4,8 @@ import _ from 'lodash';
 import { LAYER_WIDTH } from './constants';
 import { isNullOrUndefined, defaultClassPrefix, prefix } from './utils';
 
-type Props = {
-  align?: 'left' | 'center' | 'right',
-  verticalAlign?: 'top' | 'middle' | 'bottom',
-  className?: string,
-  classPrefix?: string,
-  dataKey?: string,
-  isHeaderCell?: boolean,
 
-  width: number,
-  height?: number,
-  left?: number,
-  headerHeight?: number,
-
-  style?: Object,
-  firstColumn?: boolean,
-  lastColumn?: boolean,
-  hasChildren?: boolean,
-  children?: React.Node | ((rowData?: Object) => React.Node),
-
-  rowKey?: string | number,
-  rowIndex?: number,
-  rowData?: Object,
-  depth: number,
-
-  onTreeToggle?: (
-    rowKey?: string | number,
-    rowIndex?: number,
-    rowData?: Object,
-    event?: SyntheticEvent<*>
-  ) => void,
-
-  renderTreeToggle?: (expandButton: React.Node, rowData?: Object) => React.Node,
-  renderCell?: (contentChildren: any) => React.Node,
-
-  wordWrap?: boolean,
-  removed?: boolean
-};
-
-class Cell extends React.PureComponent<Props> {
+class Cell extends React.PureComponent {
   static defaultProps = {
     classPrefix: defaultClassPrefix('table-cell'),
     align: 'left',
@@ -53,9 +16,9 @@ class Cell extends React.PureComponent<Props> {
     left: 0
   };
 
-  addPrefix = (name: string) => prefix(this.props.classPrefix)(name);
+  addPrefix = (name) => prefix(this.props.classPrefix)(name);
 
-  handleExpandClick = (event: SyntheticEvent<*>) => {
+  handleExpandClick = (event) => {
     const { onTreeToggle, rowKey, rowIndex, rowData } = this.props;
     onTreeToggle && onTreeToggle(rowKey, rowIndex, rowData, event);
   };
@@ -121,7 +84,7 @@ class Cell extends React.PureComponent<Props> {
       left
     };
 
-    const contentStyles: Object = {
+    const contentStyles = {
       width,
       height: nextHeight,
       textAlign: align,
