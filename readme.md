@@ -60,7 +60,7 @@ data = {
 |selectable|(selectedKeys)=>void `(false)` |rows can be selected |
 |editable|||
 
-###columns
+### columns
 | Property  |  Type `(Default)` |  Description  |
 | ------------ | ------------ | ------------ |
 |  title | string  | the title of table header  |
