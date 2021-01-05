@@ -1,4 +1,4 @@
-#WindUI-mobile-table
+# WindUI-mobile/table
 
 ## example
 
