@@ -1,0 +1,46 @@
+{
+  "name": "test2",
+  "version": "1.0.0",
+  "main": "./lib/main.js",
+  "files": [
+    "es",
+    "lib",
+    "assets"
+  ],
+  "module": "./es/index.js",
+  "scripts": {
+    "build": "rimraf lib && rimraf es&& webpack --progress --config webpack.prod.js &&babel src --out-dir es && xcopy src\\assets assets/y /s /i",
+    "start": "webpack-dev-server --mode development"
+  },
+  "author": "",
+  "license": "MIT",
+  "description": "",
+  "devDependencies": {
+    "@babel/cli": "^7.11.6",
+    "@babel/core": "^7.11.6",
+    "@babel/preset-env": "^7.11.5",
+    "@babel/preset-react": "^7.10.4",
+    "babel-loader": "^8.1.0",
+    "babel-preset-react": "^6.24.1",
+    "cross-env": "^7.0.2",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^4.5.0",
+    "json-server": "^0.16.2",
+    "less": "^3.12.2",
+    "svg-url-loader": "^6.0.0",
+    "webpack": "^5.0.0",
+    "webpack-cli": "^3.0.0",
+    "webpack-dev-server": "^3.11.0"
+  },
+  "dependencies": {
+    "antd": "^4.8.0",
+    "classnames": "^2.2.6",
+    "css-loader": "^5.0.1",
+    "dom-lib": "^1.2.1",
+    "element-resize-event": "^3.0.3",
+    "less-loader": "^7.0.2",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "style-loader": "^2.0.0"
+  }
+}
