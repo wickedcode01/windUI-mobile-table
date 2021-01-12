@@ -1,9 +1,8 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import _ from 'lodash';
-import { DOMMouseMoveTracker, addStyle, getOffset } from 'dom-lib';
 import { SCROLLBAR_MIN_WIDTH } from './constants';
-import { defaultClassPrefix, prefix, translateDOMPositionXY } from './utils';
+import { defaultClassPrefix, prefix, translateDOMPositionXY ,DOMMouseMoveTracker, addStyle, getOffset  } from './utils';
 
 
 class Scrollbar extends React.PureComponent {
@@ -34,9 +33,8 @@ class Scrollbar extends React.PureComponent {
   }
 
   onWheelScroll(delta) {
-    const { length, scrollLength } = this.props;
-    const nextDelta = delta / (scrollLength / length);
-
+    const { length, scrollLength,forceScrollHeight } = this.props;
+    const nextDelta=forceScrollHeight? Math.abs(delta)/delta : delta / (scrollLength / length);
     this.updateScrollBarPosition(nextDelta);
   }
 
@@ -74,8 +72,12 @@ class Scrollbar extends React.PureComponent {
   };
 
   handleScroll(delta, event) {
-    const { length, scrollLength, onScroll } = this.props;
-    const scrollDelta = delta * (scrollLength / length);
+    const { length, scrollLength, onScroll, forceScrollHeight } = this.props;
+    let scrollDelta = delta * (scrollLength / length);
+    if (forceScrollHeight) {
+      // delta=delta*forceScrollHeight/Math.abs(scrollDelta) ||0
+      scrollDelta = (Math.abs(scrollDelta) < forceScrollHeight ? forceScrollHeight * Math.abs(scrollDelta) / scrollDelta : scrollDelta) || 0
+    }
     this.updateScrollBarPosition(delta);
     onScroll && onScroll(scrollDelta, event);
   }
@@ -86,11 +88,14 @@ class Scrollbar extends React.PureComponent {
   }
 
   updateScrollBarPosition(delta, forceDelta) {
-    const { vertical, length, scrollLength, updatePosition } = this.props;
-    const max =
-      scrollLength && length
-        ? length - Math.max((length / scrollLength) * length, SCROLLBAR_MIN_WIDTH + 2)
-        : 0;
+    const { vertical, length, scrollLength, updatePosition, forceScrollHeight } = this.props;
+    let max = 0
+    if (scrollLength && length & forceScrollHeight) {
+      max = scrollLength / forceScrollHeight;
+    } else if (scrollLength && length) {
+      max = length - Math.max((length / scrollLength) * length, SCROLLBAR_MIN_WIDTH + 2)
+    }
+
     const styles = {};
 
     if (_.isUndefined(forceDelta)) {
@@ -103,6 +108,7 @@ class Scrollbar extends React.PureComponent {
 
     if (vertical) {
       updatePosition(styles, 0, this.scrollOffset);
+
     } else {
       updatePosition(styles, this.scrollOffset, 0);
     }
@@ -119,7 +125,6 @@ class Scrollbar extends React.PureComponent {
 
   handleDragMove = (deltaX, deltaY, event) => {
     const { vertical } = this.props;
-
     if (!this.mouseMoveTracker || !this.mouseMoveTracker.isDragging()) {
       return;
     }
@@ -164,7 +169,7 @@ class Scrollbar extends React.PureComponent {
   };
 
   render() {
-    const { vertical, length, scrollLength, classPrefix, className} = this.props;
+    const { vertical, length, scrollLength, classPrefix, className, forceScrollHeight } = this.props;
     const { handlePressed } = this.state;
     const addPrefix = prefix(classPrefix);
     const classes = classNames(classPrefix, className, {
@@ -174,11 +179,18 @@ class Scrollbar extends React.PureComponent {
       [addPrefix('pressed')]: handlePressed
     });
 
-    let styles = {
-      [vertical ? 'height' : 'width']: `${(length / scrollLength) * 100}%`,
-      [vertical ? 'minHeight' : 'minWidth']: SCROLLBAR_MIN_WIDTH
-    };
-    // const unhandled = getUnhandledProps(Scrollbar, rest);
+    let styles = {};
+    if (forceScrollHeight && vertical) {
+      styles = {
+        'height': `${(length - scrollLength / forceScrollHeight)}px`,
+        'minHeight': SCROLLBAR_MIN_WIDTH
+      };
+    } else {
+      styles = {
+        [vertical ? 'height' : 'width']: `${(length / scrollLength) * 100}%`,
+        [vertical ? 'minHeight' : 'minWidth']: SCROLLBAR_MIN_WIDTH
+      };
+    }
 
     return (
       <div

@@ -1,10 +1,8 @@
 import * as React from 'react';
 import classNames from 'classnames';
-import { polyfill } from 'react-lifecycles-compat';
 import Cell from './Cell';
-import ColumnResizeHandler from './ColumnResizeHandler';
 import { isNullOrUndefined, getUnhandledProps, defaultClassPrefix, prefix } from './utils';
-
+import ColumnResizeHandler from './ColumnResizeHandler';
 class HeaderCell extends React.PureComponent {
   static defaultProps = {
     classPrefix: defaultClassPrefix('table-cell-header')
@@ -44,14 +42,13 @@ class HeaderCell extends React.PureComponent {
   };
 
   handleClick = () => {
-    const { sortable,dataKey,onSortColumn } = this.props;
-    if (sortable && onSortColumn) {
-      onSortColumn(dataKey);
+    const { sortable, dataKey, onSortColumn,Key } = this.props;
+     if (sortable && onSortColumn) {
+      onSortColumn(dataKey||Key);
     }
   };
 
   addPrefix = (name) => prefix(this.props.classPrefix)(name);
-
   renderResizeSpanner() {
     const { resizable, left, onColumnResizeMove, fixed, headerHeight } = this.props;
     const { columnWidth, initialEvent } = this.state;
@@ -73,12 +70,13 @@ class HeaderCell extends React.PureComponent {
       />
     );
   }
-//渲染排序图标
+
+  //渲染排序图标
   renderSortColumn() {
-    const { sortable, sortColumn, sortType = '', dataKey } = this.props;
+    const { sortable, sortColumn, sortType = '', dataKey,Key } = this.props;
     if (sortable) {
       const iconClasses = classNames(this.addPrefix('icon-sort'), {
-        [this.addPrefix(`icon-sort-${sortType}`)]: sortColumn === dataKey
+        [this.addPrefix(`icon-sort-${sortType}`)]: sortColumn === (dataKey||Key)
       });
       return (
         <span className={this.addPrefix('sort-wrapper')}>
@@ -117,7 +115,7 @@ class HeaderCell extends React.PureComponent {
           isHeaderCell={true}
           onClick={this.handleClick}
         >
-         <span>{children}</span> 
+          <span>{children}</span>
           {this.renderSortColumn()}
         </Cell>
         {this.renderResizeSpanner()}
@@ -126,6 +124,6 @@ class HeaderCell extends React.PureComponent {
   }
 }
 
-polyfill(HeaderCell);
+
 
 export default HeaderCell;

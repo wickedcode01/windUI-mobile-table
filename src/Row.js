@@ -1,10 +1,6 @@
-// @flow
-
 import * as React from 'react';
 import classNames from 'classnames';
 import { defaultClassPrefix, getUnhandledProps, prefix, translateDOMPositionXY } from './utils';
-
-
 
 class Row extends React.PureComponent {
   static defaultProps = {
@@ -35,8 +31,8 @@ class Row extends React.PureComponent {
     });
 
     const styles = {
-      minWidth: width,
       height: isHeaderRow ? headerHeight : height,
+      // width,
       ...style
     };
 

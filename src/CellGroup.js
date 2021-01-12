@@ -1,27 +1,13 @@
-// @flow
-
 import * as React from 'react';
 import classNames from 'classnames';
-import { defaultClassPrefix, getUnhandledProps, prefix, translateDOMPositionXY } from './utils';
+import { defaultClassPrefix, getUnhandledProps, prefix } from './utils';
 
-type Props = {
-  fixed?: 'left' | 'right',
-  width?: number,
-  height?: number,
-  left?: number,
-  style?: Object,
-  className?: string,
-  classPrefix?: string,
-  updatePosition: (style: Object, x: number, y: number) => void
-};
-
-class CellGroup extends React.PureComponent<Props> {
+class CellGroup extends React.PureComponent {
   static defaultProps = {
     classPrefix: defaultClassPrefix('table-cell-group'),
-    updatePosition: translateDOMPositionXY
   };
 
-  addPrefix = (name: string) => prefix(this.props.classPrefix)(name);
+  addPrefix = (name) => prefix(this.props.classPrefix)(name);
 
   render() {
     const {
@@ -32,7 +18,6 @@ class CellGroup extends React.PureComponent<Props> {
       style,
       classPrefix,
       className,
-      updatePosition,
       ...rest
     } = this.props;
     const classes = classNames(classPrefix, className, {
@@ -45,9 +30,6 @@ class CellGroup extends React.PureComponent<Props> {
       ...style
     };
     const unhandled = getUnhandledProps(CellGroup, rest);
-
-    updatePosition(styles, left, 0);
-
     return <div {...unhandled} className={classes} style={styles} />;
   }
 }

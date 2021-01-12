@@ -7,10 +7,6 @@ import _ from 'lodash';
  * @returns {{}} A shallow copy of the prop object
  */
 export const getUnhandledProps = (Component, props, omitProps = []) => {
-  /**
-   * Note that `handledProps` are generated automatically during
-   * build with `babel-plugin-transform-react-flow-handled-props`
-   */
   const { handledProps = [] } = Component;
   return _.omit(props, [...handledProps, ...omitProps]);
 };

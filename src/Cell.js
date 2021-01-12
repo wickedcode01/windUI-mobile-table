@@ -2,10 +2,11 @@ import * as React from 'react';
 import classNames from 'classnames';
 import _ from 'lodash';
 import { LAYER_WIDTH } from './constants';
-import { isNullOrUndefined, defaultClassPrefix, prefix } from './utils';
+import { isNullOrUndefined, defaultClassPrefix, prefix,separator } from './utils';
 
 
 class Cell extends React.PureComponent {
+  state = { input: false }
   static defaultProps = {
     classPrefix: defaultClassPrefix('table-cell'),
     align: 'left',
@@ -13,35 +14,13 @@ class Cell extends React.PureComponent {
     depth: 0,
     height: 36,
     width: 0,
-    left: 0
+    left: 0,
+    verticalAlign: 'middle',
+    type: 'string',
+    digit: 2,
   };
 
   addPrefix = (name) => prefix(this.props.classPrefix)(name);
-
-  handleExpandClick = (event) => {
-    const { onTreeToggle, rowKey, rowIndex, rowData } = this.props;
-    onTreeToggle && onTreeToggle(rowKey, rowIndex, rowData, event);
-  };
-  renderExpandIcon() {
-    const { hasChildren, firstColumn, rowData, renderTreeToggle } = this.props;
-    const expandButton =(<i className={this.addPrefix('expand-icon')} />);
-
-    /**
-     * 如果用子节点，同时是第一列,则创建一个 icon 用于展开节点
-     */
-    if (hasChildren && firstColumn) {
-      return <span
-      role="button"
-      tabIndex={-1}
-      className={this.addPrefix('expand-wrapper')}
-      onClick={this.handleExpandClick}
-    >
-      {renderTreeToggle ? renderTreeToggle(expandButton, rowData) : expandButton}
-    </span>;
-    }
-    
-    return null;
-  }
 
   render() {
     const {
@@ -59,12 +38,15 @@ class Cell extends React.PureComponent {
       rowData,
       rowIndex,
       dataKey,
-      renderCell,
       removed,
       wordWrap,
       classPrefix,
       depth,
-      verticalAlign='middle',
+      verticalAlign,
+      editable,
+      type,
+      digit,
+      onClick
     } = this.props;
 
     if (removed) {
@@ -97,43 +79,50 @@ class Cell extends React.PureComponent {
       contentStyles.verticalAlign = verticalAlign;
     }
 
-    let contentChildren =
-      isNullOrUndefined(children) && rowData ? _.get(rowData, dataKey) : children;
+    let contentChildren = isNullOrUndefined(children) && rowData ? _.get(rowData, dataKey) : children;
 
     if (typeof children === 'function') {
       contentChildren = children(rowData, rowIndex);
     }
 
-    // const unhandled = getUnhandledProps(Cell, rest, [
-    //   'index',
-    //   'fixed',
-    //   'resizable',
-    //   'flexGrow',
-    //   'minWidth',
-    //   'sortColumn',
-    //   'sortType',
-    //   'onSortColumn',
-    //   'onColumnResizeEnd',
-    //   'onColumnResizeStart',
-    //   'onColumnResizeMove',
-    //   'colSpan'
-    // ]);
+    const renderFormat = (val) => {
+      switch (type) {
+        case 'string': return val;
+        case 'number': 
+          let tmp=val.match(/^(-)?(\d+)(\.\d+)?/)
+          if(tmp){
+            return separator(Number(tmp[0]).toFixed(digit))+val.replace(tmp[0],'') ;
+          }else{
+            return val
+          }
+         
+        default: return val;
+      }
+    }
 
     return (
-      <div className={classes} style={styles} onClick={this.props.onClick}>
+      <div className={classes} style={styles} onClick={(e) => {
+        if (onClick) {
+          onClick(e)
+        } else if (editable) {
+          this.setState({ input: true })
+        }
+      }}>
         {wordWrap ? (
           <div className={this.addPrefix('content')} style={contentStyles}>
             <div className={this.addPrefix('wrap')}>
-              {this.renderExpandIcon()}
-              {renderCell ? renderCell(contentChildren) : contentChildren}
+              {this.state.input ? 
+                <input style={{ width: '100%' }} ref={ref => this.input = ref} autoFocus="autoFocus" onBlur={(e) => {editable(rowIndex, dataKey, e.target.value);this.setState({ input: false })}} /> : renderFormat(contentChildren)}
             </div>
           </div>
         ) : (
-          <div className={this.addPrefix('content')} style={contentStyles}>
-            {this.renderExpandIcon()}
-            {renderCell ? renderCell(contentChildren) : contentChildren}
-          </div>
-        )}
+            <div className={this.addPrefix('content')} style={contentStyles}>
+              {this.state.input ? <input style={{ width: '100%' }} ref={ref => this.input = ref} autoFocus="autoFocus" onBlur={(e) => {
+                editable(rowIndex, dataKey, e.target.value)
+                this.setState({ input: false })
+              }} /> : renderFormat(contentChildren)}
+            </div>
+          )}
       </div>
     );
   }

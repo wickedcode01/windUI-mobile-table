@@ -1,8 +1,7 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import _ from 'lodash';
-import { DOMMouseMoveTracker } from 'dom-lib';
-import { defaultClassPrefix, getUnhandledProps } from './utils';
+import { defaultClassPrefix,DOMMouseMoveTracker } from './utils';
 
 
 class ColumnResizeHandler extends React.Component {
@@ -84,26 +83,29 @@ class ColumnResizeHandler extends React.Component {
 
   columnWidth = 0;
   cursorDelta = 0;
+  mouseMoveTracker;
+  isKeyDown;
 
   render() {
-    const { columnLeft = 0, classPrefix, height, className, style, ...rest } = this.props;
+    const { columnLeft = 0, classPrefix, height, className, style } = this.props;
     const styles = {
       left: this.columnWidth + columnLeft - 2,
       height,
-      ...style
+      width:10,
+      position:'absolute',
+      ...style,
+      zIndex:99,
+      cursor:'e-resize'
     };
 
     const classes = classNames(classPrefix, className);
-    const unhandled = getUnhandledProps(ColumnResizeHandler, rest);
 
     return (
       <div
-        {...unhandled}
         className={classes}
         style={styles}
         onMouseDown={this.onColumnResizeMouseDown}
         role="button"
-        tabIndex={-1}
       />
     );
   }

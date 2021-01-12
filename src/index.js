@@ -5,26 +5,28 @@ import Cell from './Cell.js'
 import HeaderCell from './HeaderCell';
 import './less/index.less'
 class index extends Component {
-  state = { col: '' };
+  state = { col: '', input: false, checkedList: [] };
   render() {
-    const { columns = [], onChange, ...rest } = this.props;
+    let { columns = [], data, onSortColumn, autoIndex, selectable, ...rest } = this.props;
     return (
       <div>
         <TableInner
           {...rest}
           sortColumn={this.state.col}
+          data={ data}
           onSortColumn={(key, type) => {
-            onChange && onChange(key, type);
+            onSortColumn && onSortColumn(key, type);
             this.setState({ col: key });
           }}
+          shouldFixedColumn={columns.some((val) => val.fixed)}
         >
-          {columns.map(data => {
-            const { dataIndex, key, title, render } = data;
+          {columns.map((data, index) => {
+            const { dataIndex, key, title, render, type, digit, style } = data;
             return (
-              <Column {...data} key={key ? key : dataIndex}>
-                <HeaderCell>{title}</HeaderCell>
-                <Cell dataKey={dataIndex}>
-                  {render?(rowdata)=>render(dataIndex ? rowdata[dataIndex] : rowdata):null}
+              <Column {...data} key={index} >
+                <HeaderCell Key={key}>{title}</HeaderCell>
+                <Cell dataKey={dataIndex} type={type} digit={digit} style={style} >
+                  {render ? (rowdata) => render(dataIndex ? rowdata[dataIndex] : rowdata) : undefined}
                 </Cell>
               </Column>
             );

@@ -50,9 +50,6 @@ let data = [{
 | showHeader               | boolean `(true)` | Display header                                                                                |
 | virtualized              | boolean                                                                           | virtualized render large data                                                         |
 | width                    | number                                                                            | Table width                                                                                   |
-|autoIndex|boolean `(false)` |auto-increment oreder|
-|selectable|(selectedKeys)=>void `(false)` |rows can be selected |
-|editable|||
 
 ### columns
 | Property  |  Type `(Default)` |  Description  |
@@ -63,7 +60,7 @@ let data = [{
 | align  |enum: 'left', 'center', 'right' `(left)` |  The specify which way that column is aligned |
 | verticalAlign  | enum: 'top', 'middle', 'bottom' `(middle)` |  Vertical alignment |
 |  sortable | boolean  |which can sort |
-| resizable  | boolean  |  Customizable Resize Column width |
 | minWidth  | number  |  minimum width |
 | fixed  | enum: 'left', 'right'  | Fixed column  |
 |flexGrow|number|Set the column width automatically adjusts, when you don't want you table scroll you can use it|
+|type |enum:'string','number'|format data|

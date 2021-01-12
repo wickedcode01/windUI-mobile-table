@@ -1,5 +1,5 @@
-import { addClass, removeClass } from 'dom-lib';
-
+import addClass from './addClass'
+import removeClass from './removeClass'
 const toggleClass1 = (node, className, condition) => {
   if (condition) {
     addClass(node, className);
