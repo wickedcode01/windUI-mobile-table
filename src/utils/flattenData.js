@@ -1,6 +1,7 @@
 import _ from 'lodash';
 function flattenData(data) {
   const flattenItems = [];
+
   function loop(data, _parent) {
     if (!_.isArray(data)) {
       return;

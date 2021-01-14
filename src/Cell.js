@@ -2,7 +2,7 @@ import * as React from 'react';
 import classNames from 'classnames';
 import _ from 'lodash';
 import { LAYER_WIDTH } from './constants';
-import { isNullOrUndefined, defaultClassPrefix, prefix,separator } from './utils';
+import { isNullOrUndefined, defaultClassPrefix, prefix, separator } from './utils';
 
 
 class Cell extends React.PureComponent {
@@ -43,7 +43,6 @@ class Cell extends React.PureComponent {
       classPrefix,
       depth,
       verticalAlign,
-      editable,
       type,
       digit,
       onClick
@@ -88,14 +87,14 @@ class Cell extends React.PureComponent {
     const renderFormat = (val) => {
       switch (type) {
         case 'string': return val;
-        case 'number': 
-          let tmp=val.match(/^(-)?(\d+)(\.\d+)?/)
-          if(tmp){
-            return separator(Number(tmp[0]).toFixed(digit))+val.replace(tmp[0],'') ;
-          }else{
+        case 'number':
+          val += '';
+          let tmp = val.match(/^(-)?(\d+)(\.\d+)?/)
+          if (tmp) {
+            return separator(Number(tmp[0]).toFixed(digit)) + val.replace(tmp[0], '');
+          } else {
             return val
           }
-         
         default: return val;
       }
     }
@@ -104,23 +103,17 @@ class Cell extends React.PureComponent {
       <div className={classes} style={styles} onClick={(e) => {
         if (onClick) {
           onClick(e)
-        } else if (editable) {
-          this.setState({ input: true })
         }
       }}>
         {wordWrap ? (
           <div className={this.addPrefix('content')} style={contentStyles}>
             <div className={this.addPrefix('wrap')}>
-              {this.state.input ? 
-                <input style={{ width: '100%' }} ref={ref => this.input = ref} autoFocus="autoFocus" onBlur={(e) => {editable(rowIndex, dataKey, e.target.value);this.setState({ input: false })}} /> : renderFormat(contentChildren)}
+              {renderFormat(contentChildren)}
             </div>
           </div>
         ) : (
             <div className={this.addPrefix('content')} style={contentStyles}>
-              {this.state.input ? <input style={{ width: '100%' }} ref={ref => this.input = ref} autoFocus="autoFocus" onBlur={(e) => {
-                editable(rowIndex, dataKey, e.target.value)
-                this.setState({ input: false })
-              }} /> : renderFormat(contentChildren)}
+              {renderFormat(contentChildren)}
             </div>
           )}
       </div>
