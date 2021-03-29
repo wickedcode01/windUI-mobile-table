@@ -50,6 +50,7 @@ let data = [{
 | showHeader               | boolean `(true)` | Display header                                                                                |
 | virtualized              | boolean                                                                           | virtualized render large data                                                         |
 | width                    | number                                                                            | Table width                                                                                   |
+| hideShadow|boolean|hide the shadow of table cell|
 
 ### columns
 | Property  |  Type `(Default)` |  Description  |
