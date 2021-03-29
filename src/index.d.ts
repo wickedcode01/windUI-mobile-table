@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import React, { SyntheticEvent } from "react";
 interface Props {
   virtualized?: boolean;
@@ -16,7 +15,10 @@ interface Props {
   onSortColumn?:(dataKey:string,sortType:string)=>void;
   disabledScroll?:boolean;
   showHeader?:boolean;
+  rowHeight?:number;
+  style?:object;
   scrollToEnd?:()=>void;
+  hideShadow?:boolean;
   onRowClick?:(rowData:object,event:SyntheticEvent)=>void
 }
 

@@ -45,7 +45,7 @@ class Table extends React.Component {
     defaultSortType: SORT_TYPE.DESC,
     height: 200,
     rowHeight: 46,
-    headerHeight: 40,
+    headerHeight: 32,
     minHeight: 0,
     hover: false,
     showHeader: true,
@@ -56,6 +56,7 @@ class Table extends React.Component {
     editable: false,
     showArrow: false,
     preLoad: 2,
+    hideShadow: false,
     locale: {
       emptyMessage: '暂无数据',
       loading: '加载中……'
@@ -98,7 +99,8 @@ class Table extends React.Component {
       scrollY: 0,
       isScrolling: false,
       fixedHeader: false,
-      MoreX: true
+      MoreX: true,
+      canScroll:true
     };
 
     //global
@@ -151,7 +153,6 @@ class Table extends React.Component {
       this.scrollListener = on(window, 'scroll', this.updateAffixHeaderStatus);
     }
     this.wheelWrapper.onScroll = () => {
-      console.log(111)
       this.scrollY = this.wheelWrapper.scrollTop;
     }
   }
@@ -279,7 +280,6 @@ class Table extends React.Component {
 
   //获取单元格
   getCells() {
-
     if (this._cacheCells) {
       return this._cacheCells;
     }
@@ -307,14 +307,15 @@ class Table extends React.Component {
       if (React.isValidElement(column)) {
         const columnChildren = column.props.children;
         //Column props
-        const { width, flexGrow, minWidth, editable, resizable, onResize } = column.props;
+        const { width, flexGrow, minWidth, resizable, onResize } = column.props;
         let nextWidth = this.state[`${columnChildren[1].props.dataKey}_${index}_width`] || width || 0;
 
         if (tableWidth && flexGrow && totalFlexGrow) {
-          nextWidth = Math.max(
-            ((tableWidth - totalWidth) / totalFlexGrow) * flexGrow,
-            minWidth || 80
-          );
+          nextWidth = Math.max(((tableWidth - totalWidth) / totalFlexGrow) * flexGrow, minWidth || 80);
+        }
+
+        if(flexGrow){
+          this.setState({canScroll:false})
         }
 
         const cellProps = {
@@ -327,7 +328,6 @@ class Table extends React.Component {
           height: rowHeight,
           firstColumn: index === 0,
           lastColumn: index === columns.length - 1,
-          editable: editable
         };
 
 
@@ -422,17 +422,15 @@ class Table extends React.Component {
 
   // 处理移动端 Touch 事件, Move 的时候初始化，更新 scroll
   handleTouchMove = (event) => {
-    const { onTouchMove, autoHeight, disabledScroll } = this.props;
+    const { onTouchMove, disabledScroll } = this.props;
     const { pageX: nextPageX, pageY: nextPageY } = event.touches ? event.touches[0] : {};
     let detx = this.touchX - nextPageX;
     let dety = this.touchY - nextPageY;
     const deltaX = detx;
-    const deltaY = autoHeight ? 0 : dety;
+    // const deltaY = autoHeight ? 0 : dety;
     //防止同时 左右 上下 滑造成表格抖动
     if (Math.abs(dety) >= Math.abs(detx) || !event.cancelable) {
-      if (!disabledScroll) {
-        this.scrollbarY.onWheelScroll(deltaY);
-      }
+
     } else {
       event.preventDefault();
       this.handleScrollX(deltaX);
@@ -469,7 +467,7 @@ class Table extends React.Component {
   updatePosition() {
     if (this.state.shouldFixedColumn) {
       this.updatePositionByFixedCell();
-    } else {
+    } else if(this.state.canScroll){
       const wheelStyle = {};
       const headerStyle = {};
       this.translateDOMPositionXY(wheelStyle, this.scrollX, 0);
@@ -507,9 +505,11 @@ class Table extends React.Component {
     const rightShadowClassName = this.addPrefix('cell-group-right-shadow');
     const showLeftShadow = this.scrollX < 0;
     const showRightShadow = width - contentWidth - SCROLLBAR_WIDTH !== this.scrollX;
+    if (!this.props.hideShadow) {
+      toggleClass(fixedLeftGroups, leftShadowClassName, showLeftShadow);
+      toggleClass(fixedRightGroups, rightShadowClassName, showRightShadow);
+    }
 
-    toggleClass(fixedLeftGroups, leftShadowClassName, showLeftShadow);
-    toggleClass(fixedRightGroups, rightShadowClassName, showRightShadow);
   }
 
   shouldHandleWheelX = (delta) => {
@@ -607,13 +607,10 @@ class Table extends React.Component {
   //计算表格内容高度
   calculateTableContextHeight(prevProps) {
     const rows = this._rows || [];
-    const { height, autoHeight, rowHeight, affixHeader } = this.props;
+    const { height, autoHeight, affixHeader } = this.props;
+
     const headerHeight = affixHeader ? this.getTableHeaderHeight() * 2 : this.getTableHeaderHeight();
-    const contentHeight = rows.length
-      ? Array.from(rows)
-        .map(row => rowHeight)
-        .reduce((x, y) => x + y)
-      : 0;
+    const contentHeight = rows.length ?Array.from(rows).map(item=>item.props.height).reduce((x, y) => x + y) : 0;
     const nextContentHeight = contentHeight;
     this.setState({ contentHeight: nextContentHeight });
     // 当 data 更新，或者表格高度更新，则更新滚动条
@@ -1021,9 +1018,9 @@ class Table extends React.Component {
         //虚拟化，不在显示范围内则跳过push
         top += nextRowHeight;
         if (virtualized && !wordWrap) {
-          if (top +preLoad*nextRowHeight < minTop) {
+          if (top + preLoad * nextRowHeight < minTop) {
             continue;
-          } else if (top-nextRowHeight*(preLoad+1) > maxTop) {
+          } else if (top - nextRowHeight * (preLoad + 1) > maxTop) {
             //may cause scrollbar shrink
             bottomHideHeight += nextRowHeight;
             continue;
@@ -1037,9 +1034,9 @@ class Table extends React.Component {
       }
     }
 
-    const wheelStyles = {height: autoHeight ? ('100%') : (height - headerHeight)};
+    const wheelStyles = { height: autoHeight ? ('100%') : (height - headerHeight) };
     const bottomRowStyles = { height: bottomHideHeight };
-    const mainContentStyles = { height: height + this.scrollY, maxHeight: contentHeight }
+    const mainContentStyles = { height: autoHeight ? ('100%') : (height + this.scrollY), maxHeight: contentHeight }
     return (
       <div
         ref={this.bindBodyRef}
@@ -1059,13 +1056,13 @@ class Table extends React.Component {
             <div className={this.addPrefix("scrollContent")} ref={(ref) => this.scrollContent = ref}>{this.scrollContent}</div>
             {this.rightContent.length !== 0 && <div className={this.addPrefix("rightFixed")}>{this.rightContent}</div>}
           </div>
-          {bottomHideHeight>0 ? (
+          {bottomHideHeight > 0 ? (
             <Row
               style={bottomRowStyles}
               className="virtualized"
               updatePosition={this.translateDOMPositionXY}
             />
-          ) :null}
+          ) : null}
         </div>
         {this.renderInfo()}
         {this.renderScrollbar()}
@@ -1086,11 +1083,8 @@ class Table extends React.Component {
   }
 
   renderScrollbar() {
-    const { disabledScroll, rowHeight, forceScrollRow } = this.props;
-    const { contentWidth, contentHeight } = this.state;
-    const headerHeight = this.getTableHeaderHeight();
-    const height = this.getTableHeight();
-
+    const { disabledScroll } = this.props;
+    const { contentWidth } = this.state;
     if (disabledScroll) {
       return null;
     }
@@ -1102,14 +1096,6 @@ class Table extends React.Component {
           onScroll={this.handleScrollX}
           scrollLength={contentWidth}
           ref={this.bindScrollbarXRef}
-        />
-        <Scrollbar
-          vertical
-          length={height - headerHeight}
-          scrollLength={contentHeight}
-          onScroll={this.handleScrollY}
-          ref={this.bindScrollbarYRef}
-          forceScrollHeight={forceScrollRow && rowHeight}
         />
       </div>
     );
@@ -1147,6 +1133,7 @@ class Table extends React.Component {
       wordWrap,
       classPrefix,
       loading,
+      disabledScroll,
       showHeader,
     } = this.props;
     const { contentWidth } = this.state;
@@ -1160,6 +1147,7 @@ class Table extends React.Component {
       [this.addPrefix('hover')]: hover,
       [this.addPrefix('loading')]: loading,
       [this.addPrefix('column-resizing')]: isColumnResizing,
+      [this.addPrefix('showScrollbar')]: !disabledScroll
     });
 
     const styles = {

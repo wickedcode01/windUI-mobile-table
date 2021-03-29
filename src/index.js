@@ -6,6 +6,9 @@ import HeaderCell from './HeaderCell';
 import './less/index.less'
 class index extends Component {
   state = { col: '', input: false, checkedList: [] };
+  componentDidCatch(){
+    
+  }
   render() {
     let { columns = [], data, onSortColumn, autoIndex, selectable, ...rest } = this.props;
     return (

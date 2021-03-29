@@ -1,5 +1,6 @@
+// @flow
 import _ from 'lodash';
-function flattenData(data) {
+function flattenData(data: any[]) {
   const flattenItems = [];
 
   function loop(data, _parent) {
